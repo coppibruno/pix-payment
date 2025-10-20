@@ -1,0 +1,91 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: pix_payment_postgres
+    environment:
+      POSTGRES_DB: pix_payment
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - pix_network
+
+  mongodb:
+    image: mongo:7.0
+    container_name: pix_payment_mongodb
+    environment:
+      MONGO_INITDB_DATABASE: pix_payment_logs
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - pix_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: pix_payment_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - pix_network
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: pix_payment_rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - pix_network
+
+  app:
+    build: .
+    container_name: pix_payment_app
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USERNAME=postgres
+      - DATABASE_PASSWORD=postgres
+      - DATABASE_NAME=pix_payment
+      - MONGODB_URI=mongodb://mongodb:27017/pix_payment_logs
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - RABBITMQ_URL=amqp://admin:admin@rabbitmq:5672
+      - JWT_SECRET=your-secret-key
+      - PORT=3000
+    depends_on:
+      - postgres
+      - mongodb
+      - redis
+      - rabbitmq
+    networks:
+      - pix_network
+    volumes:
+      - .:/app
+      - /app/node_modules
+
+volumes:
+  postgres_data:
+  mongodb_data:
+  redis_data:
+  rabbitmq_data:
+
+networks:
+  pix_network:
+    driver: bridge
