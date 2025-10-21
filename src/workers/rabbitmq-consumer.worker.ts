@@ -42,12 +42,9 @@ export class RabbitMQConsumerWorker {
       this.connection = await amqp.connect(rabbitmqUrl);
       this.channel = await this.connection.createChannel();
 
-      // Declara a fila
-      await this.channel.assertQueue('pix_payments', {
-        durable: true,
-      });
+      await this.setupQueues();
 
-      // Configura o consumer
+      // Configura o consumer da fila principal
       await this.channel.consume('pix_payments', async (msg) => {
         if (msg) {
           try {
@@ -55,12 +52,26 @@ export class RabbitMQConsumerWorker {
             this.channel.ack(msg);
           } catch (error) {
             this.logger.error('Erro ao processar mensagem:', error);
-            this.channel.nack(msg, false, false); // Rejeita a mensagem
+            this.logger.error('Mensagem será enviada para DLQ:', {
+              messageId: msg.properties.messageId,
+              content: msg.content.toString(),
+            });
+            // Envia mensagem manualmente para DLQ
+            await this.sendToFailedQueue(msg);
+            this.channel.ack(msg); // Confirma a mensagem original
           }
         }
       });
 
-      this.logger.log('Worker de pagamentos iniciado');
+      // Configura o consumer da DLQ para monitoramento
+      await this.channel.consume('pix_payments_failed', async (msg) => {
+        if (msg) {
+          await this.processFailedPayment(msg);
+          this.channel.ack(msg);
+        }
+      });
+
+      this.logger.log('Worker de pagamentos iniciado com DLQ configurada');
     } catch (error) {
       this.logger.error('Erro ao iniciar worker:', error);
       throw error;
@@ -121,6 +132,92 @@ export class RabbitMQConsumerWorker {
     this.logger.log(
       `Log de notificação salvo no MongoDB para charge_id: ${charge_id}`,
     );
+  }
+
+  private async processFailedPayment(msg: amqp.ConsumeMessage) {
+    try {
+      const message = JSON.parse(msg.content.toString());
+      const { charge_id, timestamp, message_id } = message;
+
+      this.logger.warn(
+        `Processando mensagem falhada da DLQ para charge_id: ${charge_id}`,
+      );
+
+      // Salva log detalhado da mensagem falhada no MongoDB
+      const failedNotificationLog = new this.notificationLogModel({
+        charge_id,
+        received_at: timestamp ? new Date(timestamp) : new Date(),
+        previous_status: 'FAILED',
+        new_status: 'DLQ_PROCESSED',
+        message_id,
+        metadata: {
+          processed_at: new Date(),
+          worker_id: process.pid,
+          dlq_processed: true,
+          original_message: message,
+          failure_reason: 'Mensagem processada da Dead Letter Queue',
+          rabbitmq_headers: msg.properties.headers,
+        },
+      });
+
+      await failedNotificationLog.save();
+
+      this.logger.log(
+        `Mensagem falhada processada e logada para charge_id: ${charge_id}`,
+      );
+    } catch (error) {
+      this.logger.error('Erro ao processar mensagem da DLQ:', error);
+      // Não fazemos nack aqui para evitar loop infinito
+    }
+  }
+
+  private async setupQueues() {
+    try {
+      // Cria a fila principal (sem argumentos problemáticos)
+      await this.channel.assertQueue('pix_payments', {
+        durable: true,
+      });
+
+      // Cria a fila de mensagens falhadas
+      await this.channel.assertQueue('pix_payments_failed', {
+        durable: true,
+      });
+
+      this.logger.log('Filas configuradas: pix_payments e pix_payments_failed');
+    } catch (error) {
+      this.logger.error('Erro ao configurar filas:', error);
+      throw error;
+    }
+  }
+
+  private async sendToFailedQueue(originalMsg: amqp.ConsumeMessage) {
+    try {
+      // Adiciona metadados de falha à mensagem
+      const failedMessage = {
+        ...JSON.parse(originalMsg.content.toString()),
+        failed_at: new Date().toISOString(),
+        failure_reason: 'Erro no processamento da mensagem original',
+        original_headers: originalMsg.properties.headers,
+      };
+
+      // Envia para a fila de falhas
+      await this.channel.sendToQueue(
+        'pix_payments_failed',
+        Buffer.from(JSON.stringify(failedMessage)),
+        {
+          persistent: true,
+          messageId: `failed_${Date.now()}_${Math.random()}`,
+          headers: {
+            original_message_id: originalMsg.properties.messageId,
+            failed_at: new Date().toISOString(),
+          },
+        },
+      );
+
+      this.logger.log('Mensagem enviada para fila de falhas');
+    } catch (error) {
+      this.logger.error('Erro ao enviar mensagem para DLQ:', error);
+    }
   }
 
   private async close() {

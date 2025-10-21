@@ -11,10 +11,10 @@ export class ChargeResponseDto {
   @ApiProperty({ description: 'Data de expiração' })
   expiration_date: Date;
 
-  @ApiProperty({ 
+  @ApiProperty({
     description: 'Status da cobrança',
     enum: ChargeStatus,
-    example: ChargeStatus.PENDING
+    example: ChargeStatus.PENDING,
   })
   status: ChargeStatus;
 

@@ -6,6 +6,7 @@ import { ChargesModule } from './modules/charges/charges.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { HealthModule } from './common/health/health.module';
 import { Charge } from './database/entities/charge.entity';
+import { RedisConfig } from './config/redis.config';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { Charge } from './database/entities/charge.entity';
       }),
       inject: [ConfigService],
     }),
+    RedisConfig,
     ChargesModule,
     NotificationsModule,
     HealthModule,

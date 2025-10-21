@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS charges (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     payer_name VARCHAR(255) NOT NULL,
     payer_document VARCHAR(20) NOT NULL,
-    amount BIGINT NOT NULL,
+    amount REAL NOT NULL,
     description TEXT,
     pix_key VARCHAR(255) NOT NULL,
     expiration_date TIMESTAMP NOT NULL,

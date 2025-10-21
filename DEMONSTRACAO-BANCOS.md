@@ -96,7 +96,7 @@ CREATE TABLE charges (
     id UUID PRIMARY KEY,
     payer_name VARCHAR(255),
     payer_document VARCHAR(20),
-    amount BIGINT,
+    amount REAL,
     description TEXT,
     pix_key VARCHAR(255),
     expiration_date TIMESTAMP,

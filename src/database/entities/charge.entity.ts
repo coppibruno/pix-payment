@@ -24,7 +24,7 @@ export class Charge {
   @Column({ type: 'varchar', length: 20 })
   payer_document: string;
 
-  @Column({ type: 'bigint' })
+  @Column({ type: 'real' })
   amount: number; // em centavos
 
   @Column({ type: 'text', nullable: true })

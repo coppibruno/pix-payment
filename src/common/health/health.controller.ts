@@ -9,8 +9,8 @@ export class HealthController {
 
   @Get()
   @ApiOperation({ summary: 'Verificar status dos serviços' })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Status dos serviços',
     schema: {
       type: 'object',
@@ -23,11 +23,11 @@ export class HealthController {
             database: { type: 'string', example: 'connected' },
             redis: { type: 'string', example: 'connected' },
             mongodb: { type: 'string', example: 'connected' },
-            rabbitmq: { type: 'string', example: 'connected' }
-          }
-        }
-      }
-    }
+            rabbitmq: { type: 'string', example: 'connected' },
+          },
+        },
+      },
+    },
   })
   async check() {
     return this.healthService.check();
