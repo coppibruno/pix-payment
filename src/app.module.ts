@@ -2,11 +2,14 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MongooseModule } from '@nestjs/mongoose';
+import { APP_GUARD } from '@nestjs/core';
 import { ChargesModule } from './modules/charges/charges.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { HealthModule } from './common/health/health.module';
+import { AuthModule } from './modules/auth/auth.module';
 import { Charge } from './database/entities/charge.entity';
 import { RedisConfig } from './config/redis.config';
+import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 
 @Module({
   imports: [
@@ -40,9 +43,16 @@ import { RedisConfig } from './config/redis.config';
       inject: [ConfigService],
     }),
     RedisConfig,
+    AuthModule,
     ChargesModule,
     NotificationsModule,
     HealthModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
   ],
 })
 export class AppModule {}

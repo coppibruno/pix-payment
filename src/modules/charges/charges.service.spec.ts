@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-// Mock do Redis
-const getRedisToken = () => 'REDIS_TOKEN';
+// Mock do Redis - não usado mas necessário para o mock
+// const getRedisToken = () => 'REDIS_TOKEN';
 import { NotFoundException } from '@nestjs/common';
 import { ChargesService } from './charges.service';
 import { Charge, ChargeStatus } from '../../database/entities/charge.entity';

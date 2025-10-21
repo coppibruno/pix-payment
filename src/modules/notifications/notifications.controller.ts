@@ -5,6 +5,7 @@ import {
   ApiResponse,
   ApiParam,
   ApiQuery,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -14,6 +15,7 @@ import {
 } from '../../database/schemas/notification-log.schema';
 
 @ApiTags('notifications')
+@ApiBearerAuth('JWT-auth')
 @Controller('notifications')
 export class NotificationsController {
   constructor(

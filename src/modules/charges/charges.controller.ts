@@ -7,7 +7,13 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { ChargesService } from './charges.service';
 import { RabbitMQService } from '../notifications/rabbitmq.service';
 import { CreateChargeDto } from './dto/create-charge.dto';
@@ -15,6 +21,7 @@ import { ChargeResponseDto } from './dto/charge-response.dto';
 import { SimulatePaymentDto } from './dto/simulate-payment.dto';
 
 @ApiTags('charges')
+@ApiBearerAuth('JWT-auth')
 @Controller('charges')
 export class ChargesController {
   constructor(

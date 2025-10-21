@@ -23,7 +23,21 @@ async function bootstrap() {
     .setTitle('Gateway Pix API')
     .setDescription('API simplificada para gateway de pagamentos Pix')
     .setVersion('1.0')
+    .addTag('auth', 'Autenticação e autorização')
     .addTag('charges', 'Operações relacionadas a cobranças Pix')
+    .addTag('notifications', 'Operações relacionadas a notificações')
+    .addTag('health', 'Verificação de saúde dos serviços')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'JWT',
+        description: 'Enter JWT token',
+        in: 'header',
+      },
+      'JWT-auth',
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
