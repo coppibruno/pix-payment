@@ -25,13 +25,13 @@ describe('RabbitMQConsumerWorker', () => {
     save: jest.fn(),
   };
 
-  const mockNotificationLogModel = {
-    constructor: jest.fn().mockImplementation((data) => ({
+  const mockNotificationLogModel = jest.fn().mockImplementation((data) => {
+    const instance = {
       ...data,
       save: jest.fn().mockResolvedValue({}),
-    })),
-    save: jest.fn(),
-  };
+    };
+    return instance;
+  });
 
   beforeEach(async () => {
     // Reset mocks
@@ -145,6 +145,12 @@ describe('RabbitMQConsumerWorker', () => {
         status: ChargeStatus.PAID,
       });
 
+      // Configura o mock do NotificationLogModel para este teste
+      const mockSave = jest.fn().mockResolvedValue({});
+      mockNotificationLogModel.mockImplementation(() => ({
+        save: mockSave,
+      }));
+
       // Simula o processamento da mensagem
       await (worker as any).processPaymentNotification(mockMessage);
 
@@ -156,7 +162,7 @@ describe('RabbitMQConsumerWorker', () => {
           status: ChargeStatus.PAID,
         }),
       );
-      expect(mockNotificationLogModel.constructor).toHaveBeenCalledWith({
+      expect(mockNotificationLogModel).toHaveBeenCalledWith({
         charge_id: 'test-charge-id',
         received_at: new Date('2024-01-01T10:00:00.000Z'),
         previous_status: ChargeStatus.PENDING,
@@ -228,7 +234,7 @@ describe('RabbitMQConsumerWorker', () => {
     it('should process failed payment successfully', async () => {
       await (worker as any).processFailedPayment(mockFailedMessage);
 
-      expect(mockNotificationLogModel.constructor).toHaveBeenCalledWith({
+      expect(mockNotificationLogModel).toHaveBeenCalledWith({
         charge_id: 'test-charge-id',
         received_at: new Date('2024-01-01T10:00:00.000Z'),
         previous_status: 'FAILED',
@@ -245,7 +251,7 @@ describe('RabbitMQConsumerWorker', () => {
 
     it('should handle processing errors gracefully', async () => {
       const error = new Error('Processing error');
-      mockNotificationLogModel.constructor.mockImplementation(() => {
+      mockNotificationLogModel.mockImplementation(() => {
         throw error;
       });
 

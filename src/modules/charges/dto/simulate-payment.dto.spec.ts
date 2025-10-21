@@ -88,7 +88,7 @@ describe('SimulatePaymentDto', () => {
       );
 
       expect(chargeIdErrors).toHaveLength(1);
-      expect(chargeIdErrors[0].constraints).toHaveProperty('isNotEmpty');
+      expect(chargeIdErrors[0].constraints).toHaveProperty('isUuid');
     });
   });
 

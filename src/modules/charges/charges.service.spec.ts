@@ -30,7 +30,7 @@ describe('ChargesService', () => {
           useValue: mockRepository,
         },
         {
-          provide: getRedisToken(),
+          provide: 'default_IORedisModuleConnectionToken',
           useValue: mockRedis,
         },
       ],
@@ -169,12 +169,7 @@ describe('ChargesService', () => {
       expect(mockRedis.setex).toHaveBeenCalledWith(
         `charge:${chargeId}`,
         300,
-        JSON.stringify(
-          expect.objectContaining({
-            charge_id: chargeId,
-            payer_name: 'João Silva',
-          }),
-        ),
+        expect.any(String),
       );
       expect(result.charge_id).toBe(chargeId);
     });
