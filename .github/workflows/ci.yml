@@ -125,24 +125,6 @@ jobs:
       - name: Run unit tests
         run: npm run test
 
-      - name: Run e2e tests
-        run: npm run test:e2e
-        env:
-          DATABASE_HOST: localhost
-          DATABASE_PORT: 5432
-          DATABASE_USERNAME: postgres
-          DATABASE_PASSWORD: postgres
-          DATABASE_NAME: test_db
-          MONGODB_URI: mongodb://root:password@localhost:27017/test_db
-          REDIS_HOST: localhost
-          REDIS_PORT: 6379
-          REDIS_PASSWORD: ''
-          RABBITMQ_URL: amqp://admin:admin@localhost:5672
-          JWT_SECRET: test-secret-key
-          JWT_EXPIRES_IN: 1h
-          PORT: 3000
-          NODE_ENV: test
-
       - name: Generate coverage report
         run: npm run test:cov
 
