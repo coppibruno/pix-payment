@@ -1,5 +1,9 @@
 # 🏦 Gateway Pix - API de Pagamentos
 
+[![CI Pipeline](https://github.com/supero/pix-payment/actions/workflows/ci.yml/badge.svg)](https://github.com/supero/pix-payment/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/supero/pix-payment/branch/main/graph/badge.svg)](https://codecov.io/gh/supero/pix-payment)
+[![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)
+
 Uma API simplificada para gateway de pagamentos Pix desenvolvida com NestJS, PostgreSQL, Redis, MongoDB e RabbitMQ.
 
 ## 🎯 Funcionalidades
