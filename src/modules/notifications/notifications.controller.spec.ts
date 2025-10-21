@@ -1,15 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 import { NotificationsController } from './notifications.controller';
-import {
-  NotificationLog,
-  NotificationLogDocument,
-} from '../../database/schemas/notification-log.schema';
+import { NotificationLog } from '../../database/schemas/notification-log.schema';
 
 describe('NotificationsController', () => {
   let controller: NotificationsController;
-  let notificationLogModel: Model<NotificationLogDocument>;
 
   const mockNotificationLogModel = {
     find: jest.fn(),
@@ -29,9 +24,6 @@ describe('NotificationsController', () => {
     }).compile();
 
     controller = module.get<NotificationsController>(NotificationsController);
-    notificationLogModel = module.get<Model<NotificationLogDocument>>(
-      getModelToken(NotificationLog.name),
-    );
   });
 
   afterEach(() => {

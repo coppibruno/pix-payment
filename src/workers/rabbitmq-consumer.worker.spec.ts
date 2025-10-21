@@ -2,14 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { getModelToken } from '@nestjs/mongoose';
 import { ConfigService } from '@nestjs/config';
-import { Repository } from 'typeorm';
-import { Model } from 'mongoose';
 import { RabbitMQConsumerWorker } from './rabbitmq-consumer.worker';
 import { Charge, ChargeStatus } from '../database/entities/charge.entity';
-import {
-  NotificationLog,
-  NotificationLogDocument,
-} from '../database/schemas/notification-log.schema';
+import { NotificationLog } from '../database/schemas/notification-log.schema';
 
 // Mock do amqplib
 jest.mock('amqplib', () => ({
@@ -18,9 +13,6 @@ jest.mock('amqplib', () => ({
 
 describe('RabbitMQConsumerWorker', () => {
   let worker: RabbitMQConsumerWorker;
-  let configService: ConfigService;
-  let chargesRepository: Repository<Charge>;
-  let notificationLogModel: Model<NotificationLogDocument>;
   let mockConnection: any;
   let mockChannel: any;
 
@@ -60,7 +52,7 @@ describe('RabbitMQConsumerWorker', () => {
     };
 
     // Mock amqplib.connect
-    const amqp = require('amqplib');
+    const amqp = jest.requireMock('amqplib');
     amqp.connect.mockResolvedValue(mockConnection);
 
     const module: TestingModule = await Test.createTestingModule({
@@ -82,13 +74,6 @@ describe('RabbitMQConsumerWorker', () => {
     }).compile();
 
     worker = module.get<RabbitMQConsumerWorker>(RabbitMQConsumerWorker);
-    configService = module.get<ConfigService>(ConfigService);
-    chargesRepository = module.get<Repository<Charge>>(
-      getRepositoryToken(Charge),
-    );
-    notificationLogModel = module.get<Model<NotificationLogDocument>>(
-      getModelToken(NotificationLog.name),
-    );
   });
 
   afterEach(() => {
@@ -122,7 +107,7 @@ describe('RabbitMQConsumerWorker', () => {
 
     it('should handle connection errors', async () => {
       const error = new Error('Connection failed');
-      const amqp = require('amqplib');
+      const amqp = jest.requireMock('amqplib');
       amqp.connect.mockRejectedValue(error);
 
       await expect(worker.onModuleInit()).rejects.toThrow('Connection failed');

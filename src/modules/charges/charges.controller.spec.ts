@@ -10,8 +10,6 @@ import { ChargeStatus } from '../../database/entities/charge.entity';
 
 describe('ChargesController', () => {
   let controller: ChargesController;
-  let chargesService: ChargesService;
-  let rabbitMQService: RabbitMQService;
 
   const mockChargesService = {
     createCharge: jest.fn(),
@@ -38,8 +36,6 @@ describe('ChargesController', () => {
     }).compile();
 
     controller = module.get<ChargesController>(ChargesController);
-    chargesService = module.get<ChargesService>(ChargesService);
-    rabbitMQService = module.get<RabbitMQService>(RabbitMQService);
   });
 
   afterEach(() => {

@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 // Mock do Redis
 const getRedisToken = () => 'REDIS_TOKEN';
-import { Repository } from 'typeorm';
 import { NotFoundException } from '@nestjs/common';
 import { ChargesService } from './charges.service';
 import { Charge, ChargeStatus } from '../../database/entities/charge.entity';
@@ -10,8 +9,6 @@ import { CreateChargeDto } from './dto/create-charge.dto';
 
 describe('ChargesService', () => {
   let service: ChargesService;
-  let repository: Repository<Charge>;
-  let redis: any;
 
   const mockRepository = {
     save: jest.fn(),
@@ -40,8 +37,6 @@ describe('ChargesService', () => {
     }).compile();
 
     service = module.get<ChargesService>(ChargesService);
-    repository = module.get<Repository<Charge>>(getRepositoryToken(Charge));
-    redis = module.get(getRedisToken());
   });
 
   afterEach(() => {

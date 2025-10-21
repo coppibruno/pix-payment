@@ -9,7 +9,6 @@ jest.mock('amqplib', () => ({
 
 describe('RabbitMQService', () => {
   let service: RabbitMQService;
-  let configService: ConfigService;
   let mockConnection: any;
   let mockChannel: any;
 
@@ -34,7 +33,7 @@ describe('RabbitMQService', () => {
     };
 
     // Mock amqplib.connect
-    const amqp = require('amqplib');
+    const amqp = jest.requireMock('amqplib');
     amqp.connect.mockResolvedValue(mockConnection);
 
     const module: TestingModule = await Test.createTestingModule({
@@ -48,7 +47,6 @@ describe('RabbitMQService', () => {
     }).compile();
 
     service = module.get<RabbitMQService>(RabbitMQService);
-    configService = module.get<ConfigService>(ConfigService);
   });
 
   afterEach(() => {
@@ -86,7 +84,7 @@ describe('RabbitMQService', () => {
 
     it('should handle connection errors', async () => {
       const error = new Error('Connection failed');
-      const amqp = require('amqplib');
+      const amqp = jest.requireMock('amqplib');
       amqp.connect.mockRejectedValue(error);
 
       await expect(service.onModuleInit()).rejects.toThrow('Connection failed');
@@ -136,7 +134,7 @@ describe('RabbitMQService', () => {
       service['connection'] = null;
 
       // Mock da reconexão
-      const amqp = require('amqplib');
+      const amqp = jest.requireMock('amqplib');
       amqp.connect.mockResolvedValue(mockConnection);
       mockChannel.sendToQueue.mockResolvedValue(true);
 
@@ -236,7 +234,7 @@ describe('RabbitMQService', () => {
   describe('private methods', () => {
     it('should handle connection errors in private connect method', async () => {
       const error = new Error('Connection failed');
-      const amqp = require('amqplib');
+      const amqp = jest.requireMock('amqplib');
       amqp.connect.mockRejectedValue(error);
 
       await expect(service.onModuleInit()).rejects.toThrow('Connection failed');
@@ -245,7 +243,7 @@ describe('RabbitMQService', () => {
     it('should handle channel creation errors', async () => {
       const error = new Error('Channel creation failed');
       mockConnection.createChannel.mockRejectedValue(error);
-      const amqp = require('amqplib');
+      const amqp = jest.requireMock('amqplib');
       amqp.connect.mockResolvedValue(mockConnection);
 
       await expect(service.onModuleInit()).rejects.toThrow(
