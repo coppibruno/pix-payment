@@ -260,10 +260,6 @@ docker run -p 3000:3000 pix-payment
 
 Este projeto está sob a licença ISC. Veja o arquivo `LICENSE` para mais detalhes.
 
-## 🐰 Teste do RabbitMQ
-
-Para testar a comunicação com RabbitMQ, consulte o guia completo em [TESTE-RABBITMQ.md](./TESTE-RABBITMQ.md).
-
 **Resumo rápido:**
 
 1. Inicie os serviços: `docker-compose -f docker-compose.dev.yml up -d`
