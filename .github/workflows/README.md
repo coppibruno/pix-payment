@@ -37,8 +37,8 @@ DATABASE_HOST: localhost
 DATABASE_PORT: 5432
 DATABASE_USERNAME: postgres
 DATABASE_PASSWORD: postgres
-DATABASE_NAME: test_db
-MONGODB_URI: mongodb://root:password@localhost:27017/test_db
+DATABASE_NAME: pix_payment_test
+MONGODB_URI: mongodb://root:password@localhost:27017/pix_payment_test
 REDIS_HOST: localhost
 REDIS_PORT: 6379
 RABBITMQ_URL: amqp://admin:admin@localhost:5672
