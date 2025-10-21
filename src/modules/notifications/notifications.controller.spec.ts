@@ -319,7 +319,6 @@ describe('NotificationsController', () => {
     });
 
     it('should handle database errors in stats', async () => {
-      // Este teste é coberto pelos outros testes de erro
       expect(true).toBe(true);
     });
 

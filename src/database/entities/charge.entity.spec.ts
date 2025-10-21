@@ -9,8 +9,6 @@ describe('Charge Entity', () => {
 
   describe('Entity Properties', () => {
     it('should have all required properties', () => {
-      // As propriedades são definidas pelos decorators do TypeORM
-      // Vamos testar se podemos definir valores para elas
       charge.id = 'test-id';
       charge.payer_name = 'João Silva';
       charge.payer_document = '12345678901';

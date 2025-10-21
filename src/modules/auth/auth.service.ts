@@ -10,8 +10,6 @@ export class AuthService {
   ) {}
 
   async validateUser(username: string, password: string): Promise<any> {
-    // Credenciais simples para demonstração
-    // Em produção, use hash de senhas e banco de dados
     const validUsername = this.configService.get<string>(
       'AUTH_USERNAME',
       'admin',
