@@ -21,21 +21,6 @@ Este diretório contém as configurações de pipeline do GitHub Actions para o 
 - MongoDB 6
 - RabbitMQ 3
 
-### 2. Test Matrix (`test-matrix.yml`)
-
-**Testa compatibilidade com diferentes versões do Node.js**
-
-- **Node.js versions**: 18, 20
-- **Objetivo**: Garantir compatibilidade com diferentes versões do Node.js
-- **Serviços**: Mesmos serviços da pipeline principal
-
-### 3. Notify Pipeline (`notify.yml`)
-
-**Sistema de notificações para status das pipelines**
-
-- **Trigger**: Executado após conclusão da CI Pipeline
-- **Funcionalidade**: Notifica sucesso ou falha da pipeline
-
 ## 🔧 Configurações
 
 ### Cache
