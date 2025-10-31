@@ -6,7 +6,10 @@ import { RabbitMQService } from '../notifications/rabbitmq.service';
 import { CreateChargeDto } from './dto/create-charge.dto';
 import { ChargeResponseDto } from './dto/charge-response.dto';
 import { SimulatePaymentDto } from './dto/simulate-payment.dto';
-import { ChargeStatus } from '../../database/entities/charge.entity';
+import {
+  ChargeStatus,
+  PaymentMethod,
+} from '../../database/entities/charge.entity';
 
 describe('ChargesController', () => {
   let controller: ChargesController;
@@ -43,20 +46,24 @@ describe('ChargesController', () => {
   });
 
   describe('createCharge', () => {
-    it('should create a new charge successfully', async () => {
+    it('should create a new PIX charge successfully', async () => {
       const createChargeDto: CreateChargeDto = {
         payer_name: 'João Silva',
         payer_document: '12345678901',
         amount: 10000,
         description: 'Pagamento de serviços',
+        customer_id: '123e4567-e89b-12d3-a456-426614174000',
+        payment_method: PaymentMethod.PIX,
       };
 
       const expectedResponse: ChargeResponseDto = {
         charge_id: 'test-uuid',
+        customer_id: '123e4567-e89b-12d3-a456-426614174000',
         payer_name: 'João Silva',
         payer_document: '12345678901',
         amount: 10000,
         description: 'Pagamento de serviços',
+        payment_method: PaymentMethod.PIX,
         pix_key: 'pix-abc123',
         expiration_date: new Date('2024-01-02T10:00:00.000Z'),
         status: ChargeStatus.PENDING,
@@ -78,16 +85,96 @@ describe('ChargesController', () => {
         payer_name: 'Maria Santos',
         payer_document: '98765432100',
         amount: 5000,
+        customer_id: '123e4567-e89b-12d3-a456-426614174000',
+        payment_method: PaymentMethod.PIX,
       };
 
       const expectedResponse: ChargeResponseDto = {
         charge_id: 'test-uuid-2',
+        customer_id: '123e4567-e89b-12d3-a456-426614174000',
         payer_name: 'Maria Santos',
         payer_document: '98765432100',
         amount: 5000,
         description: undefined,
+        payment_method: PaymentMethod.PIX,
         pix_key: 'pix-def456',
         expiration_date: new Date('2024-01-02T10:00:00.000Z'),
+        status: ChargeStatus.PENDING,
+        created_at: new Date('2024-01-01T10:00:00.000Z'),
+      };
+
+      mockChargesService.createCharge.mockResolvedValue(expectedResponse);
+
+      const result = await controller.createCharge(createChargeDto);
+
+      expect(mockChargesService.createCharge).toHaveBeenCalledWith(
+        createChargeDto,
+      );
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should create a credit card charge successfully', async () => {
+      const createChargeDto: CreateChargeDto = {
+        payer_name: 'João Silva',
+        payer_document: '12345678901',
+        amount: 10000,
+        description: 'Pagamento com cartão',
+        customer_id: '123e4567-e89b-12d3-a456-426614174000',
+        payment_method: PaymentMethod.CREDIT_CARD,
+        card_number: '4111111111111111',
+        card_expiry: '12/25',
+        card_cvv: '123',
+        card_holder_name: 'João Silva',
+        installments: 3,
+      };
+
+      const expectedResponse: ChargeResponseDto = {
+        charge_id: 'test-uuid',
+        customer_id: '123e4567-e89b-12d3-a456-426614174000',
+        payer_name: 'João Silva',
+        payer_document: '12345678901',
+        amount: 10000,
+        description: 'Pagamento com cartão',
+        payment_method: PaymentMethod.CREDIT_CARD,
+        card_number: '************1111',
+        card_holder_name: 'João Silva',
+        installments: 3,
+        status: ChargeStatus.PENDING,
+        created_at: new Date('2024-01-01T10:00:00.000Z'),
+      };
+
+      mockChargesService.createCharge.mockResolvedValue(expectedResponse);
+
+      const result = await controller.createCharge(createChargeDto);
+
+      expect(mockChargesService.createCharge).toHaveBeenCalledWith(
+        createChargeDto,
+      );
+      expect(result).toEqual(expectedResponse);
+    });
+
+    it('should create a bank slip charge successfully', async () => {
+      const createChargeDto: CreateChargeDto = {
+        payer_name: 'João Silva',
+        payer_document: '12345678901',
+        amount: 10000,
+        description: 'Pagamento via boleto',
+        customer_id: '123e4567-e89b-12d3-a456-426614174000',
+        payment_method: PaymentMethod.BANK_SLIP,
+        due_date: '2024-12-31',
+      };
+
+      const expectedResponse: ChargeResponseDto = {
+        charge_id: 'test-uuid',
+        customer_id: '123e4567-e89b-12d3-a456-426614174000',
+        payer_name: 'João Silva',
+        payer_document: '12345678901',
+        amount: 10000,
+        description: 'Pagamento via boleto',
+        payment_method: PaymentMethod.BANK_SLIP,
+        bank_slip_code: '12345678901234567890123456789012345678901234567',
+        bank_slip_url: 'https://boleto.example.com/test-uuid',
+        due_date: new Date('2024-12-31'),
         status: ChargeStatus.PENDING,
         created_at: new Date('2024-01-01T10:00:00.000Z'),
       };
@@ -107,6 +194,8 @@ describe('ChargesController', () => {
         payer_name: 'João Silva',
         payer_document: '12345678901',
         amount: 10000,
+        customer_id: '123e4567-e89b-12d3-a456-426614174000',
+        payment_method: PaymentMethod.PIX,
       };
 
       const error = new Error('Database connection failed');
@@ -130,6 +219,8 @@ describe('ChargesController', () => {
         payer_document: '12345678901',
         amount: 10000,
         description: 'Pagamento de serviços',
+        customer_id: '123e4567-e89b-12d3-a456-426614174000',
+        payment_method: PaymentMethod.PIX,
         pix_key: 'pix-abc123',
         expiration_date: new Date('2024-01-02T10:00:00.000Z'),
         status: ChargeStatus.PENDING,
@@ -228,13 +319,17 @@ describe('ChargesController', () => {
         payer_name: 'João Silva',
         payer_document: '12345678901',
         amount: 10000,
+        customer_id: '123e4567-e89b-12d3-a456-426614174000',
+        payment_method: PaymentMethod.PIX,
       };
 
       const expectedResponse: ChargeResponseDto = {
         charge_id: 'test-uuid',
+        customer_id: '123e4567-e89b-12d3-a456-426614174000',
         payer_name: 'João Silva',
         payer_document: '12345678901',
         amount: 10000,
+        payment_method: PaymentMethod.PIX,
         pix_key: 'pix-abc123',
         expiration_date: new Date(),
         status: ChargeStatus.PENDING,
@@ -256,6 +351,8 @@ describe('ChargesController', () => {
         payer_name: 'João Silva',
         payer_document: '12345678901',
         amount: 10000,
+        customer_id: '123e4567-e89b-12d3-a456-426614174000',
+        payment_method: PaymentMethod.PIX,
         pix_key: 'pix-abc123',
         expiration_date: new Date(),
         status: ChargeStatus.PENDING,

@@ -30,7 +30,9 @@ export class ChargesController {
   ) {}
 
   @Post()
-  @ApiOperation({ summary: 'Criar nova cobrança Pix' })
+  @ApiOperation({
+    summary: 'Criar nova cobrança (PIX, Cartão de Crédito ou Boleto)',
+  })
   @ApiResponse({
     status: 201,
     description: 'Cobrança criada com sucesso',

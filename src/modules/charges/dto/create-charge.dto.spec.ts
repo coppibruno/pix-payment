@@ -1,5 +1,6 @@
 import { validate } from 'class-validator';
 import { CreateChargeDto } from './create-charge.dto';
+import { PaymentMethod } from '../../../database/entities/charge.entity';
 
 describe('CreateChargeDto', () => {
   let dto: CreateChargeDto;
@@ -298,6 +299,8 @@ describe('CreateChargeDto', () => {
       dto.payer_document = '12345678901';
       dto.amount = 10000;
       dto.description = 'Pagamento de serviços';
+      dto.customer_id = '123e4567-e89b-12d3-a456-426614174000';
+      dto.payment_method = PaymentMethod.PIX;
 
       const errors = await validate(dto);
 
@@ -309,20 +312,26 @@ describe('CreateChargeDto', () => {
       dto.payer_document = '123'; // invalid
       dto.amount = -1000; // invalid
       dto.description = 123 as any; // invalid
+      dto.customer_id = 'invalid-uuid'; // invalid
+      dto.payment_method = 'invalid' as any; // invalid
 
       const errors = await validate(dto);
 
-      expect(errors).toHaveLength(4);
+      expect(errors).toHaveLength(6);
       expect(errors.map((error) => error.property)).toContain('payer_name');
       expect(errors.map((error) => error.property)).toContain('payer_document');
       expect(errors.map((error) => error.property)).toContain('amount');
       expect(errors.map((error) => error.property)).toContain('description');
+      expect(errors.map((error) => error.property)).toContain('customer_id');
+      expect(errors.map((error) => error.property)).toContain('payment_method');
     });
 
     it('should pass validation with minimum required fields', async () => {
       dto.payer_name = 'João Silva';
       dto.payer_document = '12345678901';
       dto.amount = 10000;
+      dto.customer_id = '123e4567-e89b-12d3-a456-426614174000';
+      dto.payment_method = PaymentMethod.PIX;
       // description is optional
 
       const errors = await validate(dto);

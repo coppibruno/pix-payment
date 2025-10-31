@@ -186,12 +186,13 @@ describe('Pix Payment API E2E Tests', () => {
   });
 
   describe('Charges Management', () => {
-    it('should create a new charge', async () => {
+    it('should create a new PIX charge', async () => {
       const chargeData = {
         payer_name: 'João Silva',
         payer_document: '12345678901',
         amount: 100.5,
         description: 'Pagamento de teste',
+        payment_method: 'pix',
       };
 
       const response = await request(app.getHttpServer())
@@ -211,10 +212,73 @@ describe('Pix Payment API E2E Tests', () => {
         'description',
         chargeData.description,
       );
+      expect(response.body).toHaveProperty('payment_method', 'pix');
+      expect(response.body).toHaveProperty('pix_key');
+      expect(response.body).toHaveProperty('expiration_date');
       expect(response.body).toHaveProperty('status', 'pending');
       expect(response.body).toHaveProperty('created_at');
 
       createdChargeId = response.body.charge_id;
+    });
+
+    it('should create a new credit card charge', async () => {
+      const chargeData = {
+        payer_name: 'Maria Santos',
+        payer_document: '98765432100',
+        amount: 250.0,
+        description: 'Pagamento com cartão',
+        payment_method: 'credit_card',
+        card_number: '4111111111111111',
+        card_expiry: '12/25',
+        card_cvv: '123',
+        card_holder_name: 'Maria Santos',
+        installments: 3,
+      };
+
+      const response = await request(app.getHttpServer())
+        .post('/charges')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send(chargeData)
+        .expect(201);
+
+      expect(response.body).toHaveProperty('charge_id');
+      expect(response.body).toHaveProperty('payer_name', chargeData.payer_name);
+      expect(response.body).toHaveProperty('payment_method', 'credit_card');
+      expect(response.body).toHaveProperty('card_number');
+      expect(response.body).toHaveProperty(
+        'card_holder_name',
+        chargeData.card_holder_name,
+      );
+      expect(response.body).toHaveProperty(
+        'installments',
+        chargeData.installments,
+      );
+      expect(response.body).toHaveProperty('status', 'pending');
+    });
+
+    it('should create a new bank slip charge', async () => {
+      const chargeData = {
+        payer_name: 'Pedro Costa',
+        payer_document: '11122233344',
+        amount: 500.0,
+        description: 'Pagamento via boleto',
+        payment_method: 'bank_slip',
+        due_date: '2024-12-31',
+      };
+
+      const response = await request(app.getHttpServer())
+        .post('/charges')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send(chargeData)
+        .expect(201);
+
+      expect(response.body).toHaveProperty('charge_id');
+      expect(response.body).toHaveProperty('payer_name', chargeData.payer_name);
+      expect(response.body).toHaveProperty('payment_method', 'bank_slip');
+      expect(response.body).toHaveProperty('bank_slip_code');
+      expect(response.body).toHaveProperty('bank_slip_url');
+      expect(response.body).toHaveProperty('due_date');
+      expect(response.body).toHaveProperty('status', 'pending');
     });
 
     it('should get a specific charge by ID', async () => {
@@ -247,6 +311,7 @@ describe('Pix Payment API E2E Tests', () => {
         payer_name: '', // Nome vazio
         payer_document: '123', // Documento inválido
         amount: -10, // Valor negativo
+        payment_method: 'pix',
       };
 
       await request(app.getHttpServer())
@@ -259,6 +324,7 @@ describe('Pix Payment API E2E Tests', () => {
     it('should reject charge creation without required fields', async () => {
       const incompleteData = {
         payer_name: 'João Silva',
+        payment_method: 'pix',
         // Missing required fields
       };
 
@@ -318,6 +384,7 @@ describe('Pix Payment API E2E Tests', () => {
     it('should handle missing required fields', async () => {
       const incompleteData = {
         payer_name: 'João Silva',
+        payment_method: 'pix',
         // Missing required fields
       };
 

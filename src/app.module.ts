@@ -4,10 +4,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { MongooseModule } from '@nestjs/mongoose';
 import { APP_GUARD } from '@nestjs/core';
 import { ChargesModule } from './modules/charges/charges.module';
+import { CustomersModule } from './modules/customers/customers.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { HealthModule } from './common/health/health.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { Charge } from './database/entities/charge.entity';
+import { Customer } from './database/entities/customer.entity';
 import { RedisConfig } from './config/redis.config';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 
@@ -26,7 +28,7 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
         username: configService.get('DATABASE_USERNAME', 'postgres'),
         password: configService.get('DATABASE_PASSWORD', 'postgres'),
         database: configService.get('DATABASE_NAME', 'pix_payment'),
-        entities: [Charge],
+        entities: [Charge, Customer],
         synchronize: configService.get('NODE_ENV') === 'development',
         logging: configService.get('NODE_ENV') === 'development',
       }),
@@ -44,6 +46,7 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
     }),
     RedisConfig,
     AuthModule,
+    CustomersModule,
     ChargesModule,
     NotificationsModule,
     HealthModule,
